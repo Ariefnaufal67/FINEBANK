@@ -3,11 +3,21 @@ const helmet = require('helmet');
 const cors = require('cors');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
-const swaggerUi = require('swagger-ui-express');
 const config = require('./config');
 const openapi = require('./openapi');
 const { authenticate, requireRole } = require('./middleware/auth');
 const { notFoundHandler, errorHandler } = require('./middleware/error');
+
+
+// Swagger UI dimuat dari CDN agar tidak bergantung pada file di node_modules (serverless Vercel).
+const swaggerHtml = `<!doctype html>
+<html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FineBank API - Docs</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.34.1/swagger-ui.css">
+</head><body><div id="swagger-ui"></div>
+<script src="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.34.1/swagger-ui-bundle.js"></script>
+<script>window.onload = function () { window.ui = SwaggerUIBundle({ url: '/openapi.json', dom_id: '#swagger-ui', persistAuthorization: true }); };</script>
+</body></html>`;
 
 function createApp(opts = {}) {
   const rl = { ...config.rateLimit, ...(opts.rateLimit || {}) };
@@ -29,7 +39,7 @@ function createApp(opts = {}) {
 
   app.get('/', (_req, res) => res.json({ name: 'FineBank API', docs: '/docs', health: '/health' }));
   app.get('/health', (_req, res) => res.json({ status: 'ok', uptime: process.uptime() }));
-  app.use('/docs', swaggerUi.serve, swaggerUi.setup(openapi));
+  app.get('/docs', (_req, res) => res.type('html').send(swaggerHtml));
   app.get('/openapi.json', (_req, res) => res.json(openapi));
 
   app.use('/api', globalLimiter);

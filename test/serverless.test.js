@@ -13,3 +13,14 @@ test('handler Vercel: membuat tabel lalu melayani request', async () => {
   const me = await request(server).get('/api/auth/me').set('Authorization', `Bearer ${reg.body.data.token}`);
   assert.equal(me.body.data.email, 'v@test.dev');
 });
+
+test('/docs menyajikan halaman Swagger yang menunjuk ke /openapi.json', async () => {
+  const server = http.createServer(handler);
+  const docs = await request(server).get('/docs');
+  assert.equal(docs.status, 200);
+  assert.match(docs.headers['content-type'], /html/);
+  assert.match(docs.text, /swagger-ui-bundle\.js/);
+  assert.match(docs.text, /\/openapi\.json/);
+  const spec = await request(server).get('/openapi.json');
+  assert.equal(spec.body.openapi, '3.0.3');
+});
