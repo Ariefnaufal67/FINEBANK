@@ -4,8 +4,9 @@ const { Sequelize } = require('sequelize');
 const config = require('./config');
 
 function createSequelize() {
-  // Produksi (Railway/Render): PostgreSQL lewat DATABASE_URL
-  if (config.databaseUrl) {
+  // Produksi: PostgreSQL lewat DATABASE_URL. Mode test SELALU memakai SQLite in-memory,
+  // supaya test (yang mengosongkan tabel) tidak pernah menyentuh database sungguhan.
+  if (config.databaseUrl && !config.isTest) {
     // Neon/Supabase mewajibkan SSL; aktif otomatis jika URL memuat sslmode=require.
     const useSsl = process.env.DATABASE_SSL === 'true' || /sslmode=require/.test(config.databaseUrl);
     return new Sequelize(config.databaseUrl, {

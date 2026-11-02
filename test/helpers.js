@@ -4,6 +4,7 @@ const createApp = require('../src/app');
 const { sequelize, User } = require('../src/models');
 
 async function setup(opts) {
+  if (sequelize.getDialect() !== 'sqlite') throw new Error('Test hanya boleh memakai SQLite in-memory');
   await sequelize.sync({ force: true });
   return createApp(opts);
 }
