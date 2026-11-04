@@ -1,0 +1,25 @@
+$kind: http-request
+url: "{{baseUrl}}/api/expenses"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "title": "Nonton bioskop",
+      "amount": 55000,
+      "date": "2026-10-25",
+      "categoryId": "{{categoryId}}"
+    }
+auth:
+  type: bearer
+  credentials:
+    token: "{{token}}"
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('Status 201', () => pm.response.to.have.status(201));
+      pm.collectionVariables.set('expenseId', pm.response.json().data.id);
+    language: text/javascript
+order: 1000

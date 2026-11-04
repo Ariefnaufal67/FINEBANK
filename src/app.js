@@ -6,6 +6,8 @@ const rateLimit = require('express-rate-limit');
 const config = require('./config');
 const openapi = require('./openapi');
 const { authenticate, requireRole } = require('./middleware/auth');
+const profiler = require('./utils/profiler');
+const pages = require('./views/pages');
 const { notFoundHandler, errorHandler } = require('./middleware/error');
 
 
@@ -37,18 +39,25 @@ function createApp(opts = {}) {
   const globalLimiter = rateLimit({ ...limiterBase, limit: rl.max });
   const authLimiter = rateLimit({ ...limiterBase, limit: rl.authMax });
 
-  app.get('/', (_req, res) => res.json({ name: 'FineBank API', docs: '/docs', health: '/health' }));
+  app.get('/', (_req, res) => res.type('html').send(pages.home));
+  app.get('/statistik', (_req, res) => res.type('html').send(pages.statistik));
+  app.get('/profiling', (_req, res) => res.type('html').send(pages.profiling));
+  app.get('/api', (_req, res) => res.json({ name: 'FineBank API', docs: '/docs', health: '/health', statistik: '/statistik', profiling: '/profiling' }));
   app.get('/health', (_req, res) => res.json({ status: 'ok', uptime: process.uptime() }));
   app.get('/docs', (_req, res) => res.type('html').send(swaggerHtml));
   app.get('/openapi.json', (_req, res) => res.json(openapi));
 
   app.use('/api', globalLimiter);
+  app.use('/api', profiler.middleware);
   app.use('/api/auth/login', authLimiter);
   app.use('/api/auth/register', authLimiter);
   app.use('/api/auth', require('./routes/auth'));
   app.use('/api/categories', authenticate, require('./routes/categories'));
   app.use('/api/expenses', authenticate, require('./routes/expenses'));
   app.use('/api/bills', authenticate, require('./routes/bills'));
+  app.use('/api/stats', authenticate, require('./routes/stats'));
+  app.get('/api/profiling', authenticate, requireRole('admin'), (_req, res) => res.json({ success: true, data: profiler.snapshot() }));
+  app.delete('/api/profiling', authenticate, requireRole('admin'), (_req, res) => { profiler.reset(); res.status(204).end(); });
   app.use('/api/users', authenticate, requireRole('admin'), require('./routes/users'));
 
   app.use(notFoundHandler);

@@ -1,0 +1,24 @@
+$kind: http-request
+url: "{{baseUrl}}/api/bills"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "name": "Netflix",
+      "amount": 54000,
+      "dueDate": "2026-11-10"
+    }
+auth:
+  type: bearer
+  credentials:
+    token: "{{token}}"
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('Status 201', () => pm.response.to.have.status(201));
+      pm.collectionVariables.set('billId', pm.response.json().data.id);
+    language: text/javascript
+order: 1000

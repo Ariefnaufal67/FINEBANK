@@ -6,8 +6,12 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "node --watch src/server.js",
-    "seed": "node src/seed.js",
-    "test": "cross-env NODE_ENV=test node --test --test-concurrency=1 test/auth.test.js test/bills.test.js test/expenses.test.js test/pagination.test.js test/serverless.test.js"
+    "seed": "node seeders/demo-seed.js",
+    "test": "cross-env NODE_ENV=test node --test --test-concurrency=1 test/auth.test.js test/bills.test.js test/expenses.test.js test/pagination.test.js test/profiling.test.js test/stats.test.js test/migrations.test.js test/serverless.test.js",
+    "import": "node scripts/import-csv.js",
+    "migrate": "node scripts/migrate.js up",
+    "migrate:undo": "node scripts/migrate.js down",
+    "migrate:status": "node scripts/migrate.js status"
   },
   "engines": {
     "node": ">=20"

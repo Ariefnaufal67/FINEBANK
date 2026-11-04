@@ -1,0 +1,13 @@
+# Use this workspace to collaborate
+workspace:
+  id: 64a618fc-6660-4c0b-8fa9-eeec40618d3f
+
+cloudResources:
+  collections:
+    ../postman/collections/FineBank API: 637e365f-454a-415a-ba3e-97e413d6ad5e
+
+# All resources in the `postman/` folder are automatically registered in Local View.
+# Point to additional files outside the `postman/` folder to register them individually. Example:
+#localResources:
+#  collections:
+#    - ../tests/E2E Test Collection/

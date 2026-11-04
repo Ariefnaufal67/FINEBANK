@@ -1,0 +1,37 @@
+# Jalankan: docker compose up -d --build
+# Tabel dibuat otomatis lewat migrasi saat api start. Isi data: docker compose exec api npm run import
+services:
+  api:
+    container_name: finebank-api
+    build: .
+    command: sh -c "npm run migrate && node src/server.js"
+    ports:
+      - "3000:3000"
+    environment:
+      PORT: 3000
+      DATABASE_URL: postgres://finebank:finebank_password@postgres:5432/finebank
+      JWT_SECRET: ganti-dengan-string-acak-panjang
+      CORS_ORIGIN: "*"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+  postgres:
+    container_name: finebank-db
+    image: postgres:17
+    environment:
+      POSTGRES_DB: finebank
+      POSTGRES_USER: finebank
+      POSTGRES_PASSWORD: finebank_password
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data/pgdata
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U finebank -d finebank"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+volumes:
+  pgdata:

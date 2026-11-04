@@ -10,6 +10,8 @@ module.exports = {
   sqlitePath: process.env.SQLITE_PATH || './data/finebank.sqlite',
   jwtSecret: process.env.JWT_SECRET || (isTest ? 'test-secret' : 'dev-only-secret-ganti-di-produksi'),
   jwtExpiresIn: process.env.JWT_EXPIRES_IN || '1d',
+  dbProfiling: !isTest && process.env.DB_PROFILING !== 'false',
+  slowQueryMs: Number(process.env.SLOW_QUERY_MS) || 100,
   corsOrigin: process.env.CORS_ORIGIN || '*',
   rateLimit: {
     windowMs: Number(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000,

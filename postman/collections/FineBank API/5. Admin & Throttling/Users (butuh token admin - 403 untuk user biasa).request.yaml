@@ -1,0 +1,13 @@
+$kind: http-request
+name: Users (butuh token admin -> 403 untuk user biasa)
+url: "{{baseUrl}}/api/users"
+method: GET
+auth:
+  type: bearer
+  credentials:
+    token: "{{token}}"
+scripts:
+  - type: afterResponse
+    code: pm.test('403 atau 200', () => pm.expect([200, 403]).to.include(pm.response.code));
+    language: text/javascript
+order: 1000

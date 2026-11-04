@@ -1,0 +1,17 @@
+$kind: http-request
+url: "{{baseUrl}}/api/expenses?page=1&limit=5"
+method: GET
+queryParams:
+  page: "1"
+  limit: "5"
+auth:
+  type: bearer
+  credentials:
+    token: "{{token}}"
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('Status 200', () => pm.response.to.have.status(200));
+      pm.test('ada meta', () => pm.expect(pm.response.json().meta).to.have.property('totalPages'));
+    language: text/javascript
+order: 2000

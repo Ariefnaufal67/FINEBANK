@@ -1,0 +1,8 @@
+$kind: collection
+description: "Jalankan folder berurutan: Auth -> Categories -> Expenses -> Bills."
+variables:
+  baseUrl: http://localhost:3000
+  token: ""
+  expenseId: ""
+  billId: ""
+  categoryId: ""

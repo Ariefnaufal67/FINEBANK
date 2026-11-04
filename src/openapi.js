@@ -44,6 +44,10 @@ module.exports = {
     '/api/bills/{id}/pay': { post: { tags: ['Bills'], summary: 'Tandai bill lunas', security: sec, parameters: [idParam], responses: { 200: ok } } },
     '/api/users': { get: { tags: ['Users (admin)'], summary: 'Daftar user (khusus admin)', security: sec, parameters: [...paging, q('q'), q('role')], responses: { 200: ok, 403: { description: 'Bukan admin' } } } },
     '/api/users/{id}': { delete: { tags: ['Users (admin)'], summary: 'Hapus user (khusus admin)', security: sec, parameters: [idParam], responses: { 204: { description: 'Terhapus' }, 403: { description: 'Bukan admin' } } } },
+    '/api/stats/expenses': { get: { tags: ['Statistik'], summary: 'Statistik pengeluaran: total, min/max/avg, termurah/termahal, per kategori, per bulan', security: sec, responses: { 200: ok } } },
+    '/api/stats/bills': { get: { tags: ['Statistik'], summary: 'Statistik tagihan per status (paid, unpaid, overdue)', security: sec, responses: { 200: ok } } },
+    '/api/stats/users': { get: { tags: ['Statistik'], summary: 'Statistik pengguna (khusus admin): teraktif, tanpa pengeluaran, rata-rata', security: sec, responses: { 200: ok, 403: { description: 'Bukan admin' } } } },
+    '/api/profiling': { get: { tags: ['Users (admin)'], summary: 'Profiling request dan query ORM (khusus admin): rata-rata waktu, paling lama, paling banyak query', security: sec, responses: { 200: ok, 403: { description: 'Bukan admin' } } } },
     '/health': { get: { tags: ['System'], summary: 'Health check', responses: { 200: ok } } },
   },
 };

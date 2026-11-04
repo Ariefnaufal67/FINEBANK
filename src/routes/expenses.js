@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const { Op } = require('sequelize');
+const { Op, fn, col } = require('sequelize');
 const { Expense, Category } = require('../models');
 const validate = require('../middleware/validate');
 const { expenseCreate, expenseUpdate, expenseQuery } = require('../schemas');
@@ -13,7 +13,7 @@ const scope = (req) => (req.user.role === 'admin' ? {} : { userId: req.user.id }
 
 async function assertCategory(req, categoryId) {
   if (categoryId == null) return;
-  const cat = await Category.findOne({ where: { id: categoryId, userId: req.user.id } });
+  const cat = await Category.findOne({ where: { id: categoryId, userId: req.user.id }, attributes: ['id'] });
   if (!cat) throw badRequest('categoryId tidak valid');
 }
 
@@ -34,20 +34,34 @@ router.get('/', validate(expenseQuery, 'query'), async (req, res) => {
   }
   const p = parsePagination(f);
   const order = parseSort(f.sort, ['date', 'amount', 'title', 'createdAt'], [['date', 'DESC'], ['id', 'DESC']]);
-  const { rows, count } = await Expense.findAndCountAll({ where, include, order, limit: p.limit, offset: p.offset });
+  // Optimasi: count tanpa JOIN (kategori tidak memengaruhi jumlah baris), dijalankan paralel dengan data.
+  const [rows, count] = await Promise.all([
+    Expense.findAll({ where, include, order, limit: p.limit, offset: p.offset }),
+    Expense.count({ where }),
+  ]);
   res.json({ success: true, data: rows, meta: buildMeta(p, count) });
 });
 
 router.get('/summary', async (req, res) => {
-  const rows = await Expense.findAll({ where: scope(req), include });
+  // Optimasi: agregasi di database (GROUP BY), bukan memuat semua baris lalu menjumlah di JS.
+  const groups = await Expense.findAll({
+    where: scope(req),
+    attributes: ['categoryId', [fn('SUM', col('amount')), 'total'], [fn('COUNT', col('id')), 'count']],
+    group: ['categoryId'],
+    raw: true,
+  });
+  const ids = groups.map((g) => g.categoryId).filter((id) => id != null);
+  const names = new Map((ids.length ? await Category.findAll({ where: { id: ids }, attributes: ['id', 'name'], raw: true }) : []).map((c) => [c.id, c.name]));
   const byCategory = {};
   let total = 0;
-  for (const e of rows) {
-    total += e.amount;
-    const key = e.category ? e.category.name : 'Tanpa kategori';
-    byCategory[key] = (byCategory[key] || 0) + e.amount;
+  let count = 0;
+  for (const g of groups) {
+    const key = g.categoryId != null && names.has(g.categoryId) ? names.get(g.categoryId) : 'Tanpa kategori';
+    byCategory[key] = (byCategory[key] || 0) + Number(g.total);
+    total += Number(g.total);
+    count += Number(g.count);
   }
-  res.json({ success: true, data: { total, count: rows.length, byCategory } });
+  res.json({ success: true, data: { total, count, byCategory } });
 });
 
 router.get('/:id', async (req, res) => {

@@ -1,0 +1,22 @@
+$kind: http-request
+name: "Login (seed: arief@finebank.test)"
+url: "{{baseUrl}}/api/auth/login"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "email": "arief@finebank.test",
+      "password": "password123"
+    }
+auth:
+  type: noauth
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('Status 200', () => pm.response.to.have.status(200));
+      pm.collectionVariables.set('token', pm.response.json().data.token);
+    language: text/javascript
+order: 3000
