@@ -71,3 +71,14 @@ test('/api/stats/users: hanya admin; berisi top user dan user tanpa pengeluaran'
   assert.equal(d2.usersNoExpenses.length, 1);
   assert.equal(d2.usersNoExpenses[0].email, 'baru@test.dev');
 });
+
+test('halaman web tersedia: beranda, statistik, profiling, pengeluaran, tagihan', async () => {
+  for (const path of ['/', '/statistik', '/profiling', '/pengeluaran', '/tagihan']) {
+    const res = await request(app).get(path);
+    assert.equal(res.status, 200, path);
+    assert.match(res.headers['content-type'], /html/);
+    assert.match(res.text, /FineBank/);
+  }
+  assert.match((await request(app).get('/pengeluaran')).text, /\/api\/expenses/);
+  assert.match((await request(app).get('/tagihan')).text, /\/api\/bills/);
+});

@@ -41,6 +41,8 @@ function createApp(opts = {}) {
 
   app.get('/', (_req, res) => res.type('html').send(pages.home));
   app.get('/statistik', (_req, res) => res.type('html').send(pages.statistik));
+  app.get('/pengeluaran', (_req, res) => res.type('html').send(pages.pengeluaran));
+  app.get('/tagihan', (_req, res) => res.type('html').send(pages.tagihan));
   app.get('/profiling', (_req, res) => res.type('html').send(pages.profiling));
   app.get('/api', (_req, res) => res.json({ name: 'FineBank API', docs: '/docs', health: '/health', statistik: '/statistik', profiling: '/profiling' }));
   app.get('/health', (_req, res) => res.json({ status: 'ok', uptime: process.uptime() }));

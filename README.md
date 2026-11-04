@@ -34,6 +34,8 @@ Akun seed: `admin@finebank.test` (admin), `arief@finebank.test` (user).
 | URL | Isi |
 |---|---|
 | `/` | Beranda dan ringkasan |
+| `/pengeluaran` | CRUD pengeluaran dengan form: tambah, ubah, hapus, cari, filter kategori, urut, pagination, kelola kategori |
+| `/tagihan` | CRUD tagihan dengan form: tambah, ubah, hapus, tandai lunas, filter status (termasuk terlambat) |
 | `/statistik` | Dashboard statistik (kartu, grafik Chart.js, tabel); admin juga melihat statistik pengguna |
 | `/profiling` | Dashboard profiling request dan query ORM (khusus admin) |
 | `/docs` | Swagger UI |
